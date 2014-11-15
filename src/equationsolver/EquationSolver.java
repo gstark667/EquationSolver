@@ -20,7 +20,8 @@ public class EquationSolver {
     public static void main(String[] args) {
         Scanner input = new Scanner(System.in);
         String line = input.nextLine();
-        System.out.println(solve(line, Integer.parseInt(input.nextLine())));
+        for(int x = 0; x < 100; x++)
+            System.out.println(solve(line, x));
         input.close();
     }
     
@@ -60,8 +61,16 @@ public class EquationSolver {
     }
     
     public static double solveChunck(String chunk, int x) {
-        System.out.println("Chunk:" + chunk);
-        if(chunk.contains("^") && !(chunk.startsWith("(") && chunk.endsWith(")"))) {
+        //System.out.println("Chunk:" + chunk);
+        if(chunk.startsWith("(") && chunk.endsWith(")") && getPar(chunk) == 1) {
+            String inside = "";
+            int i = 1;
+            while(i < chunk.length()-1) {
+                inside += chunk.charAt(i);
+                i++;
+            }
+            return solve(inside, x);
+        }else if(chunk.contains("^") && getPar(chunk) == 0) {
             if(chunk.startsWith("x")) {
                 return Math.pow(x, solveChunck(chunk.split("\\^")[1], x));
             }else if(chunk.startsWith("-x")) {
@@ -69,7 +78,7 @@ public class EquationSolver {
             }else{
                 return Math.pow(x, solveChunck(chunk.split("\\^")[1], x)) * solveChunck(chunk.split("x")[0], x);
             }
-        }else if(chunk.contains("*") || chunk.contains("/")) {
+        }else if((chunk.contains("*") || chunk.contains("/"))) {
             String front = "";
             String back = "";
             boolean mult = false;
@@ -97,15 +106,7 @@ public class EquationSolver {
             }else{
                 return solveChunck(front, x) / solveChunck(back, x);
             }
-        }if(chunk.startsWith("(") && chunk.endsWith(")")) {
-            String inside = "";
-            int i = 1;
-            while(i < chunk.length()-1) {
-                inside += chunk.charAt(i);
-                i++;
-            }
-            return solve(inside, x);
-        }else if(chunk.contains("x")) {
+        }else if(chunk.contains("x") && getPar(chunk) == 0) {
             if(chunk.equals("x")) {
                 return x;
             }else{
@@ -119,6 +120,29 @@ public class EquationSolver {
             }
         }
         return 0;
+    }
+    
+    public static double getPar(String input) {
+        int p = 0;
+        
+        int count = 0;
+        
+        for(int c = 0; c < input.length(); c++) {
+            char ch =input.charAt(c);
+            
+            if(ch == '(') {
+                if(count == 0) {
+                    p++;
+                    count++;
+                }else{
+                    count++;
+                }
+            }else if(ch == ')') {
+                count--;
+            }
+        }
+        
+        return p;
     }
     
 }
